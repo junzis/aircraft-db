@@ -1,3 +1,4 @@
 import sys
-sys.path.insert(0, '/var/www/py/aircrafts')
+import os
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 from webserver import app as application
