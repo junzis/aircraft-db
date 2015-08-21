@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block body %}
+	<form method="post" accept-charset="utf-8" role="form" class="form-inline">
+		<div class="form-group text required">
+			<input class="form-control" id="search-flight-id" name="q" required="required" style="font-family:courier;font-size:16px" />
+		</div>
+		<div class="form-group text-center">
+			<input type="submit" class="btn btn-primary btn btn-default" value="Search">
+		</div>
+	</form>
+	<div class="help-block">
+		You may search by: ICAO address, registration ID, aircraft model, or FR24 reference
+	</div>
+	
+	<hr/>
+
+	{% if results: %}
+		<table class="table table-bordered table-hover">
+			<thead>
+				<tr>
+					<th>ICAO Addr.</th>
+					<th>Reg. ID</th>
+					<th>Model</th>
+					<th>FR24 Ref</th>
+					<th>Call Sign (Last)</th>
+					<th>Flight (Last)</th>
+					<th>Updated</th>
+					<th>More</th>
+				</tr>
+			</thead>
+			{% for res in results %}
+			<tr>
+				<td>{{res['icao']}}</td>
+				<td>{{res['regid']}}</td>
+				<td>{{res['mdl']}}</td>
+				<td>{{res['fr24']}}</td>
+				<td>{{res['cs']}}</td>
+				<td>{{res['fn']}}</td>
+				<td>{{readtime(res['ts'])}}</td>
+				<td>
+					<a href="http://www.flightradar24.com/data/airplanes/{{res['regid']}}/" target="_blank">Details</a>
+				</td>
+			</tr>
+			{% endfor %}
+		</table>
+	{% else: %}
+		<div class="well well-sm">
+			No record found..
+		</div>
+	{% endif %}
+
+{% endblock %}

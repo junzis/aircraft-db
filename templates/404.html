@@ -1,0 +1,17 @@
+<!doctype html>
+<head>
+	<title>SkyPlots {% block title %}{% endblock %}</title>
+	<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/style.css">
+	<script src="/js/jquery-2.1.1.min.js"></script>
+	<script src="/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+	<div class="container">
+		<h1>Page Not Found</h1>
+		<hr/>
+		<p>What you were looking for is just not there.
+		<p><a href="{{ url_for('index') }}">Back to homepage</a>
+	</div>
+</body>

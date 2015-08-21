@@ -1,0 +1,20 @@
+<!doctype html>
+<head>
+	<title>SkyPlots {% block title %}{% endblock %}</title>
+	<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/style.css">
+	<script src="/js/jquery-2.1.1.min.js"></script>
+	<script src="/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+	<div class="container">
+		<h1>Internal Error</h1>
+		<hr/>
+		<p>Ops, somthing went wrong..
+		<p><a href="{{ url_for('index') }}">Back to homepage</a>
+		<pre>
+			{{ e }}
+		</pre>
+	</div>
+</body>

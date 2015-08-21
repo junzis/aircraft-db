@@ -1,0 +1,36 @@
+<!doctype html>
+<head>
+	<title>SkyPlots</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+	<script src="{{ url_for('static', filename='jquery-2.1.1.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+</head>
+
+<body>
+	<div class="container">
+	{% with messages = get_flashed_messages(with_categories=true) %}
+		{% if messages %}
+			{% for cat, msg in messages %}
+				<div class="alert alert-{{cat}} alert-dismissible" role="alert">
+					<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					{{ msg }}
+				</div>
+			{% endfor %}
+	  	{% endif %}
+	{% endwith %}
+
+	<h1>
+		Aircraft IDs Lookup
+		<div class="pull-right">
+			<a class="btn btn-sm btn-info" href="{{url_for('index')}}">Home</a>
+			<a class="btn btn-sm btn-info" href="{{url_for('download')}}">Download Entire DB (SQL)</a>
+		</div>
+	</h1>
+
+	<hr/>
+
+	{% block body %}{% endblock %}
+
+	</div>
+</body>
