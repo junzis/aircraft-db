@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block body %}
+	<h2>Database Statistic</h2>
+	<hr/>
+	{% if data: %}
+		<h3 class="well well-sm"> {{data['total_acs']}} of identifiable aircrafts in DB </h3>
+		<hr/>
+
+		<h3>Number of aircraft by models</h3>
+		<table class="table table-bordered table-hover">
+			<thead>
+				<tr>
+					<th>Model</th>
+					<th>Number of aircrafts</th>
+				</tr>
+			</thead>
+			{% for mdl in data['models'] %}
+			<tr>
+				<td>{{mdl[0]}}</td>
+				<td>{{mdl[1]}}</td>
+			</tr>
+			{% endfor %}
+		</table>
+	{% else: %}
+		<div class="well well-sm">
+			No record found..
+		</div>
+	{% endif %}
+
+{% endblock %}

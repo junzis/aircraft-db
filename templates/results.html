@@ -22,6 +22,8 @@
 					<th>ICAO Addr.</th>
 					<th>Reg. ID</th>
 					<th>Model</th>
+					<th>Type</th>
+					<th>Owner</th>
 					<th>FR24 Ref</th>
 					<th>Call Sign (Last)</th>
 					<th>Flight (Last)</th>
@@ -34,12 +36,14 @@
 				<td>{{res['icao']}}</td>
 				<td>{{res['regid']}}</td>
 				<td>{{res['mdl']}}</td>
+				<td>{{res['type']}}</td>
+				<td>{{res['owner']}}</td>
 				<td>{{res['fr24']}}</td>
 				<td>{{res['cs']}}</td>
 				<td>{{res['fn']}}</td>
 				<td>{{readtime(res['ts'])}}</td>
 				<td>
-					<a href="http://www.flightradar24.com/data/airplanes/{{res['regid']}}/" target="_blank">Details</a>
+					<a href="http://www.nullrefer.com/?http://www.flightradar24.com/data/airplanes/{{res['regid'].lower()}}/" target="_blank">Details</a>
 				</td>
 			</tr>
 			{% endfor %}

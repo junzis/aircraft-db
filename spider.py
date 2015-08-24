@@ -5,77 +5,7 @@ import time
 import sys
 import multiprocessing
 import pymysql
-
-dbconn = pymysql.connect(host='localhost',
-                         user='aircraft',
-                         password='aircraft',
-                         db='aircraft',
-                         charset='utf8',
-                         cursorclass=pymysql.cursors.DictCursor)
-
-fetch_sql = "SELECT * FROM `ids` WHERE `icao` = %s"
-
-insert_sql = "INSERT INTO `ids` (`icao`, `regid`, `mdl`, `fr24`, `cs`, `fn`, `ts`) \
-                VALUES (%s, %s, %s, %s, %s, %s, %s)"
-
-update_sql = "UPDATE `ids` \
-                SET `icao`=%s, `regid`=%s, `mdl`=%s, `fr24`=%s, `cs`=%s, `fn`=%s, `ts`=%s \
-                WHERE `icao`=%s"
-
-def upsert_ac_data(cursor, key, data):
-    if len(data) != 18:
-        return None
-
-    # get aircraft ids
-    icao = data[0]
-    mdl = data[8]
-    regid = data[9]
-    ts = data[10]
-    fn = data[13]
-    cs = data[16]
-    fr24 = key
-
-    if not (icao and mdl and regid) :
-        return None
-
-    # insert or update record in database
-    cursor.execute(fetch_sql, (icao))
-    result =  cursor.fetchone()
-    if result:
-        cursor.execute(update_sql, (icao, regid, mdl, fr24, cs, fn, ts, icao))
-    else:
-        # print insert_sql, (icao, regid, mdl, fr24, cs, fn, ts)
-        cursor.execute(insert_sql, (icao, regid, mdl, fr24, cs, fn, ts))
-        dbconn.commit()
-
-def spider_run(urls):
-    try:
-        cursor = dbconn.cursor()
-
-        for url in urls:
-            r = requests.get(url)
-            if r.status_code != 200:
-                pass
-
-            try:
-                jdata = r.json()
-            except:
-                pass
-
-            if len(jdata) < 2:
-                pass
-
-            # remove some fields
-            if 'version' in jdata:
-                del jdata['version']
-
-            if 'full_count' in jdata:
-                del jdata['full_count']
-
-            for key, val in jdata.iteritems():
-                upsert_ac_data(cursor, key, val)
-    finally:
-        dbconn.close()
+from bs4 import BeautifulSoup
 
 
 base_url = "http://lhr.data.fr24.com/zones/fcgi/feed.js?faa=1&mlat=1&flarm=0" \
@@ -124,18 +54,126 @@ world_zones = [
     [-30, -90, -180, 180]
 ]
 
-west_europe_uk_zone = [
-    [60,50,-15,5],
-    [60,50,5,25],
-    [50,35,-15,5],
-    [50,35,-5,25],
-]
+def connect_db():
+    return pymysql.connect(host='localhost',
+                             user='aircraft',
+                             password='aircraft',
+                             db='aircraft',
+                             charset='utf8',
+                             cursorclass=pymysql.cursors.DictCursor)
 
-# Generating fetching url for each zone
-urls = []
+def upsert_ac_data(cursor, key, data):
+    if len(data) != 18:
+        return None
+
+    # get aircraft ids
+    icao = data[0]
+    mdl = data[8]
+    regid = data[9]
+    ts = data[10]
+    fn = data[13]
+    cs = data[16]
+    fr24 = key
+
+    if not (icao and mdl and regid) :
+        return None
+
+    # insert or update record in database
+    sql_fetch_all = "SELECT * FROM `ids` WHERE `icao` = %s"
+    cursor.execute(sql_fetch_all, (icao))
+    result =  cursor.fetchone()
+    if result:
+        sql_update_ac = "UPDATE `ids` \
+                    SET `icao`=%s, `regid`=%s, `mdl`=%s, `fr24`=%s, `cs`=%s, `fn`=%s, `ts`=%s \
+                    WHERE `icao`=%s"
+        cursor.execute(sql_update_ac, (icao, regid, mdl, fr24, cs, fn, ts, icao))
+    else:
+        sql_insert_ac = "INSERT INTO `ids` (`icao`, `regid`, `mdl`, `fr24`, `cs`, `fn`, `ts`) \
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        cursor.execute(sql_insert_ac, (icao, regid, mdl, fr24, cs, fn, ts))
+
+def update_aircraft_info(regid):
+    info = []
+    url = "http://www.flightradar24.com/data/airplanes/" + regid.lower()
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+
+    soup = BeautifulSoup(r.text)
+    for node in soup.find(id="cntAircraftDetails").dl.find_all('dd'):
+        info.append(node.find_all(text=True)[0])
+    
+    if len(info) < 6:
+        return None
+
+    # update record
+    try:
+        dbconn = connect_db()
+        cursor = dbconn.cursor()
+        sql_update_ac_info = "UPDATE `ids` SET `type`=%s, `owner`=%s WHERE `regid`=%s"
+        cursor.execute(sql_update_ac_info, (info[3], info[5], info[1]))
+        dbconn.commit()
+    except:
+        print "error occoured.."
+    finally:
+        dbconn.close()
+
+
+# ---- Generating fetching url for each zone ----
+zone_urls = []
 for zone in world_zones:
     bounds = ','.join(str(d) for d in zone)
     url = base_url + "&bounds=" + bounds
-    urls.append(url)
+    zone_urls.append(url)
 
-spider_run(urls)
+# ---- Get all the online aircraft from FR24 and update DB ----
+try:
+    dbconn = connect_db()
+    cursor = dbconn.cursor()
+
+    for url in zone_urls:
+        r = requests.get(url)
+        if r.status_code != 200:
+            pass
+
+        try:
+            jdata = r.json()
+        except:
+            pass
+
+        if len(jdata) < 2:
+            pass
+
+        # remove some fields
+        if 'version' in jdata:
+            del jdata['version']
+
+        if 'full_count' in jdata:
+            del jdata['full_count']
+
+        for key, val in jdata.iteritems():
+            upsert_ac_data(cursor, key, val)
+            dbconn.commit()
+except:
+    print 'error occoured...'
+finally:
+    dbconn.close()
+
+
+# ---- Fetch all regid update aricraft info ----
+try:
+    dbconn = connect_db()
+    cursor = dbconn.cursor()
+    sql_fetch_all = "SELECT `regid`, `type`, `owner` FROM `ids`"
+    cursor.execute(sql_fetch_all)
+    aircrafts = cursor.fetchall()
+except:
+    print 'error occoured...'
+finally:
+    dbconn.close()
+
+# ---- update aircrafts info ----
+for ac in aircrafts:
+    if not (ac['type'] and ac['owner']):
+        print 'processing: ' + ac['regid']
+        update_aircraft_info(ac['regid'])
