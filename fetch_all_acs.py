@@ -92,32 +92,6 @@ def upsert_ac_data(cursor, key, data):
                     VALUES (%s, %s, %s, %s, %s, %s, %s)"
         cursor.execute(sql_insert_ac, (icao, regid, mdl, fr24, cs, fn, ts))
 
-def update_aircraft_info(regid):
-    info = []
-    url = "http://www.flightradar24.com/data/airplanes/" + regid.lower()
-    r = requests.get(url)
-    if r.status_code != 200:
-        return None
-
-    soup = BeautifulSoup(r.text)
-    for node in soup.find(id="cntAircraftDetails").dl.find_all('dd'):
-        info.append(node.find_all(text=True)[0])
-    
-    if len(info) < 6:
-        return None
-
-    # update record
-    try:
-        dbconn = connect_db()
-        cursor = dbconn.cursor()
-        sql_update_ac_info = "UPDATE `ids` SET `type`=%s, `owner`=%s WHERE `regid`=%s"
-        cursor.execute(sql_update_ac_info, (info[3], info[5], info[1]))
-        dbconn.commit()
-    except:
-        print "error occoured.."
-    finally:
-        dbconn.close()
-
 
 # ---- Generating fetching url for each zone ----
 zone_urls = []
@@ -158,22 +132,3 @@ except:
     print 'error occoured...'
 finally:
     dbconn.close()
-
-
-# ---- Fetch all regid update aricraft info ----
-try:
-    dbconn = connect_db()
-    cursor = dbconn.cursor()
-    sql_fetch_all = "SELECT `regid`, `type`, `owner` FROM `ids`"
-    cursor.execute(sql_fetch_all)
-    aircrafts = cursor.fetchall()
-except:
-    print 'error occoured...'
-finally:
-    dbconn.close()
-
-# ---- update aircrafts info ----
-for ac in aircrafts:
-    if not (ac['type'] and ac['owner']):
-        print 'processing: ' + ac['regid']
-        update_aircraft_info(ac['regid'])
