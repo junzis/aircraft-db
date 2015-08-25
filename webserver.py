@@ -64,6 +64,20 @@ def index():
 
         return render_template('results.html', results=results)
 
+@app.route('/random')
+def random():
+    try:
+        dbconn = connect_db()
+        cursor = dbconn.cursor()
+        fetch_sql = "SELECT * FROM `ids` ORDER BY RAND() LIMIT 100"
+        cursor.execute(fetch_sql)
+        results =  cursor.fetchall()
+    except:
+        results = None
+    finally:
+        dbconn.close()
+
+    return render_template('results.html', results=results)
 
 @app.route('/stats')
 def stats():
