@@ -1,4 +1,4 @@
-import os, time, json, ast
+import os, time, json, re
 import flask
 import pymysql
 import datetime
@@ -65,6 +65,31 @@ def index():
 
         return render_template('results.html', results=results)
 
+
+@app.route('/search')
+def search():
+    n = request.args.get('n', '')
+    n = " ".join(re.findall("[a-zA-Z]+", n))    # security, only letters
+    q = request.args.get('q', '')
+    if not q or not n:
+        return redirect(url_for('index'))
+    
+    # received query param
+    try:
+        dbconn = connect_db()
+        cursor = dbconn.cursor()
+        fetch_sql = "SELECT * FROM `ids` WHERE `" + n + "` LIKE %s "
+        cursor.execute(fetch_sql, '%'+q+'%')
+        results =  cursor.fetchall()
+        print cursor._last_executed
+    except Exception, e:
+        results = None
+        print e
+    finally:
+        dbconn.close()
+
+    return render_template('results.html', results=results)
+
 @app.route('/random')
 def random():
     try:
@@ -87,19 +112,23 @@ def stats():
         cursor = dbconn.cursor()
         data = {}
 
-        # get number of aircrafts
-        sql = "SELECT COUNT(DISTINCT `icao`) FROM `ids`";
-        cursor.execute(sql)
-        results =  cursor.fetchone()
-        data['total_acs'] = results[results.keys()[0]]
-
-        # get number of models
-        sql = "SELECT `icao`, `regid`, `mdl`  FROM `ids`";
+        sql = "SELECT `icao`, `regid`, `mdl`, `owner`  FROM `ids`";
         cursor.execute(sql)
         results =  cursor.fetchall()
+
+        # total count
+        data['total_acs'] = len(results)
+
+        # owners stat
+        owners = [ r['owner'] for r in results ]
+        owner_counts = collections.Counter(owners)
+        data['owners'] = sorted(list(owner_counts.items()), 
+                key=lambda x: x[1], reverse=True)
+
+        # models stat
         models = [ r['mdl'] for r in results ]
-        mdlcnt = collections.Counter(models)
-        data['models'] = sorted(list(mdlcnt.items()), 
+        model_counts = collections.Counter(models)
+        data['models'] = sorted(list(model_counts.items()), 
                 key=lambda x: x[1], reverse=True)
     except:
         data = None

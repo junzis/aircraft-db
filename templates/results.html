@@ -10,13 +10,13 @@
 		</div>
 	</form>
 	<div class="help-block">
-		You may search by: ICAO address, registration ID, aircraft model, or FR24 reference
+		You may search by: ICAO address, registration ID, or aircraft model
 	</div>
 	
 	<hr/>
 
 	{% if results: %}
-		<table class="table table-bordered table-hover">
+		<table class="table table-bordered table-hover table-condensed">
 			<thead>
 				<tr>
 					<th>ICAO Addr.</th>
@@ -24,7 +24,6 @@
 					<th>Model</th>
 					<th>Type</th>
 					<th>Owner</th>
-					<th>FR24 Ref</th>
 					<th>Call Sign (Last)</th>
 					<th>Flight (Last)</th>
 					<th>Updated</th>
@@ -36,9 +35,12 @@
 				<td>{{res['icao']}}</td>
 				<td>{{res['regid']}}</td>
 				<td>{{res['mdl']}}</td>
-				<td>{{res['type']}}</td>
-				<td>{{res['owner']}}</td>
-				<td>{{res['fr24']}}</td>
+				<td>
+					{{res['type']}} <a href="{{url_for('search', n='type', q=res['type'])}}">+</a>
+				</td>
+				<td>
+					{{res['owner']}} <a href="{{url_for('search', n='owner', q=res['owner'])}}">+</a>
+				</td>
 				<td>{{res['cs']}}</td>
 				<td>{{res['fn']}}</td>
 				<td>{{readtime(res['ts'])}}</td>

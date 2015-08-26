@@ -8,20 +8,28 @@
 		<hr/>
 
 		<h3>Number of aircraft by models</h3>
-		<table class="table table-bordered table-hover">
-			<thead>
-				<tr>
-					<th>Model</th>
-					<th>Number of aircrafts</th>
-				</tr>
-			</thead>
+		<div class="well well-sm">
 			{% for mdl in data['models'] %}
-			<tr>
-				<td>{{mdl[0]}}</td>
-				<td>{{mdl[1]}}</td>
-			</tr>
-			{% endfor %}
-		</table>
+				<span style="display:inline-block; width:130px;">
+					<span style="display:inline-block; width:40px;"> {{mdl[0]}} </span>
+					<span style="display:inline-block; width:40px;"> [<strong>{{mdl[1]}}</strong>] </span>
+				</span>
+			{% endfor %} 
+		</div>
+
+		<h3>Number of aircraft by owners</h3>
+		<div class="well well-sm">
+			{% for owner in data['owners'] %}
+				<span style="display:inline-block; width:200px; 
+					border-bottom: 1px solid #000; margin-right:10px; padding-top:10px">
+					{{owner[0]}}
+					<a href="{{url_for('search', n='owner', q=owner[0])}}">+</a>
+					<br/>
+					[<strong>{{owner[1]}}</strong>] 
+				</span>
+			{% endfor %} 
+		</div>
+
 	{% else: %}
 		<div class="well well-sm">
 			No record found..
