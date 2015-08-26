@@ -1,12 +1,7 @@
 import requests
 import json
-import timeit
 import time
-import sys
-import multiprocessing
 import pymysql
-from bs4 import BeautifulSoup
-
 
 base_url = "http://lhr.data.fr24.com/zones/fcgi/feed.js?faa=1&mlat=1&flarm=0" \
     "&adsb=1&gnd=1&air=1&vehicles=0&estimated=0&maxage=0&gliders=0&stats=1"

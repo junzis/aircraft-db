@@ -1,9 +1,5 @@
 import requests
-import json
-import timeit
 import time
-import sys
-import multiprocessing
 import pymysql
 from bs4 import BeautifulSoup
 

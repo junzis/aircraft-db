@@ -4,7 +4,8 @@ import pymysql
 import datetime
 import collections
 
-from flask import Flask, redirect, url_for, render_template, request, flash, session, send_from_directory
+from flask import Flask, redirect, url_for, render_template, request, \
+    flash, session, send_from_directory
 
 def readtime(timestamp):
     """Convert unix timestamp to human readable time"""
@@ -98,7 +99,8 @@ def stats():
         results =  cursor.fetchall()
         models = [ r['mdl'] for r in results ]
         mdlcnt = collections.Counter(models)
-        data['models'] = sorted(list(mdlcnt.items()), key=lambda x: x[1], reverse=True)
+        data['models'] = sorted(list(mdlcnt.items()), 
+                key=lambda x: x[1], reverse=True)
     except:
         data = None
     finally:
@@ -108,7 +110,8 @@ def stats():
 @app.route('/download')
 def download():
     folder = os.path.join(app.root_path, 'files')
-    return send_from_directory(directory=folder, filename='aircrafts_dump.sql', as_attachment=True)
+    return send_from_directory(directory=folder, 
+            filename='aircrafts_dump.csv', as_attachment=True)
 
 if __name__ == "__main__":
     app.run()
