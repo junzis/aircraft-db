@@ -45,25 +45,27 @@ def index():
     if request.method == "POST":
         q = request.form['q']
         return redirect( url_for('index', q=q))
-    else:
-        q = request.args.get('q', '')
-        if not q:
-            return render_template('index.html')
-        
-        # received query param
-        try:
-            dbconn = connect_db()
-            cursor = dbconn.cursor()
-            fetch_sql = "SELECT * FROM `ids` WHERE `icao`=%s OR `regid`=%s \
-                        OR `mdl`=%s OR `fr24`=%s"
-            cursor.execute(fetch_sql, [q]*4)
-            results =  cursor.fetchall()
-        except:
-            results = None
-        finally:
-            dbconn.close()
 
-        return render_template('results.html', results=results)
+    # GET Method
+    q = request.args.get('q', '')
+    if not q:
+        return render_template('index.html')
+    
+    # received query param
+    try:
+        dbconn = connect_db()
+        cursor = dbconn.cursor()
+        fetch_sql = "SELECT * FROM `ids` WHERE `icao`=%s OR `regid`=%s"
+        cursor.execute(fetch_sql, [q.upper(), q])
+        results =  cursor.fetchall()
+        total_count = len(results)
+    except:
+        results = None
+    finally:
+        dbconn.close()
+
+    return render_template('results.html', results=results, 
+            total_count=total_count, n=0, q=q, p=0)
 
 
 @app.route('/search', methods=['GET', 'POST'])
@@ -73,9 +75,23 @@ def search():
         q = request.form['q']
         return redirect(url_for('search', n=n, q=q))
 
+    # GET request
     n = request.args.get('n', '')
     n = " ".join(re.findall("[a-zA-Z]+", n))    # security, only letters
     q = request.args.get('q', '')
+    p = request.args.get('p', '')
+    try:
+        p = int(p)
+        if p < 0:
+            p = 0
+    except:
+        p = 0
+        pass
+
+    # ICAO all upper cases
+    if n == 'icao':
+        q = q.upper()
+
     if not q or not n:
         return redirect(url_for('index'))
     
@@ -83,17 +99,25 @@ def search():
     try:
         dbconn = connect_db()
         cursor = dbconn.cursor()
-        fetch_sql = "SELECT * FROM `ids` WHERE `" + n + "` LIKE %s "
-        cursor.execute(fetch_sql, '%'+q+'%')
+
+        count_sql = "SELECT COUNT(*) FROM `ids` WHERE `" + n + "` LIKE %s"
+        cursor.execute(count_sql, '%'+q+'%')
+        count =  cursor.fetchone()
+        total_count = count[count.keys()[0]]
+
+        fetch_sql = "SELECT * FROM `ids` WHERE `" + n + "` LIKE %s LIMIT %s,%s"
+        cursor.execute(fetch_sql, ('%'+q+'%', p*100, 100))
         results =  cursor.fetchall()
-        print cursor._last_executed
+        # print cursor._last_executed
     except Exception, e:
         results = None
+        total_count = 0
         print e
     finally:
         dbconn.close()
 
-    return render_template('results.html', results=results)
+    return render_template('results.html', results=results, 
+            total_count=total_count, n=n, q=q, p=p)
 
 @app.route('/random')
 def random():
@@ -103,12 +127,14 @@ def random():
         fetch_sql = "SELECT * FROM `ids` ORDER BY RAND() LIMIT 100"
         cursor.execute(fetch_sql)
         results =  cursor.fetchall()
+        total_count = len(results)
     except:
         results = None
     finally:
         dbconn.close()
 
-    return render_template('results.html', results=results)
+    return render_template('results.html', results=results, 
+            total_count=total_count, p=0, q=0, n=0)
 
 @app.route('/stats')
 def stats():

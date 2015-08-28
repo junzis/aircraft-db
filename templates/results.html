@@ -4,6 +4,26 @@
 	{% include 'search-box.html' %}
 
 	{% if results: %}
+		<span>
+			Total <strong>{{total_count}}</strong> number of results found.
+			<strong>Page {{p+1}} of {{(total_count/100)|round(0, 'ceil')|int}}</strong>. 
+			
+			<span class="pull-right">
+				{% if p>0:%}
+					<a href="{{url_for('search', n=n, q=q, p=p-1)}}">< Prev</a>
+				{% else: %}
+					< Prev
+				{% endif %}
+				|
+				{% if p*100+100 < total_count:%}
+					<a href="{{url_for('search', n=n, q=q, p=p+1)}}">Next ></a>
+				{% else: %}
+					Next >
+				{% endif %}
+			</span>
+		</span>
+		<br/><br/>
+
 		<table class="table table-bordered table-hover table-condensed">
 			<thead>
 				<tr>
@@ -40,7 +60,8 @@
 		</table>
 	{% else: %}
 		<div class="well well-sm">
-			No record found..
+			No record found.. <br/><br/>
+		<a href="{{url_for('random')}}"> Show 100 Random Aircrafts</a>
 		</div>
 	{% endif %}
 
