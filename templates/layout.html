@@ -2,9 +2,7 @@
 <head>
 	<title>Aircraft ID Finder</title>
 	<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
-	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-	<script src="{{ url_for('static', filename='jquery-2.1.1.min.js') }}"></script>
-	<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='jquery-2.1.4.min.js') }}"></script>
 </head>
 
 <body>
@@ -21,7 +19,7 @@
 	{% endwith %}
 
 	<h1>
-		Aircraft IDs Lookup
+		Aircraft ID Finder
 		<div class="pull-right">
 			<a class="btn btn-sm btn-info" href="{{url_for('index')}}">Home</a>
 			<a class="btn btn-sm btn-info" href="{{url_for('stats')}}">Stats</a>

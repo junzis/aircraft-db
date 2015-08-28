@@ -1,0 +1,41 @@
+<form method="post" accept-charset="utf-8" role="form" class="form-inline">
+	<div class="form-group text required">
+		<input class="form-control" id="search-flight-id" name="q" required="required" style="font-family:courier;font-size:16px" />
+	</div>
+	<div class="form-group">
+		<input type="submit" class="btn btn-primary btn btn-default" value="Search">
+	</div>
+</form>
+<div class="help-block">
+	You may search by: ICAO address, registration ID, or aircraft model. 
+	[ <a href="#" id='advance-search-toggle'>Advance Query</a> ]
+</div>
+
+<form id="advance-search-form" method="post" accept-charset="utf-8" role="form" class="form-inline" action="{{url_for('search')}}" style="display:none">
+	<div class="form-group">
+		<select class="form-control" name="n" required="required" >
+			<option value="">-- Select Field --</option>
+			<option value="icao">ICAO Addr.</option>
+			<option value="regid">Reg. ID</option>
+			<option value="mdl">Model Code</option>
+			<option value="type">Modle Type</option>
+			<option value="owner">Owner</option>
+			<option value="cs">Call Sign</option>
+			<option value="fn">Flight</option>
+		</select>
+	</div>
+	<div class="form-group text required">
+		<input class="form-control" id="search-flight-id" name="q" placeholder="Contains" required="required" />
+	</div>
+	<div class="form-group">
+		<input type="submit" class="btn btn-primary btn btn-info" value="Query">
+	</div>
+</form>
+
+<hr/>
+
+<script type="text/javascript">
+	$("#advance-search-toggle").click(function(){
+		$("#advance-search-form").slideToggle();
+	})
+</script>

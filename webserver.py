@@ -66,8 +66,13 @@ def index():
         return render_template('results.html', results=results)
 
 
-@app.route('/search')
+@app.route('/search', methods=['GET', 'POST'])
 def search():
+    if request.method == "POST":
+        n = request.form['n']
+        q = request.form['q']
+        return redirect(url_for('search', n=n, q=q))
+
     n = request.args.get('n', '')
     n = " ".join(re.findall("[a-zA-Z]+", n))    # security, only letters
     q = request.args.get('q', '')
