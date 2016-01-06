@@ -1,71 +1,46 @@
-import os, time, json, re
-import flask
-import pymysql
-import datetime
-import collections
-
-from flask import Flask, redirect, url_for, render_template, request, \
-    flash, session, send_from_directory
-
-def readtime(timestamp):
-    """Convert unix timestamp to human readable time"""
-    return datetime.datetime.fromtimestamp(
-            timestamp
-        ).strftime('%Y-%m-%d %H:%M:%S')
-
-def connect_db():
-    return pymysql.connect(host='localhost',
-                 user='aircraft',
-                 password='aircraft',
-                 db='aircraft',
-                 charset='utf8',
-                 cursorclass=pymysql.cursors.DictCursor)
+from flask import render_template as page
+from flask import Flask, redirect, url_for, request, \
+                  send_from_directory, Response
+import os
+import json
+import re
+import pymongo
+import random
+import statistics
 
 app = Flask(__name__)
 app.debug = True
-app.secret_key = '$1$mxQd/Zad2f3L$QvjertyBgyJ5dctN0/lTNVfadfa3'
-app.jinja_env.globals.update(readtime=readtime)
+app.secret_key = '$1$rrxQdds52Zad2f3L$Qdqpy5ertyJ5dctHFd0/lTNsa35fa3'
 
+mclient = pymongo.MongoClient()
+mcoll = mclient.aif.aircraft
 
-# Note: We don't need to call run() since our application is embedded within
-# the App Engine WSGI application server.
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html'), 404
+    return page('404.html'), 404
 
 
 @app.errorhandler(500)
 def internal_error(e):
-    return render_template('500.html', e=e), 500
+    return page('500.html', e=e), 500
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == "POST":
         q = request.form['q']
-        return redirect( url_for('index', q=q))
+        return redirect(url_for('index', q=q))
 
     # GET Method
-    q = request.args.get('q', '')
+    q = request.args.get('q', '').lower()
     if not q:
-        return render_template('index.html')
-    
-    # received query param
-    try:
-        dbconn = connect_db()
-        cursor = dbconn.cursor()
-        fetch_sql = "SELECT * FROM `ids` WHERE `icao`=%s OR `regid`=%s"
-        cursor.execute(fetch_sql, [q.upper(), q])
-        results =  cursor.fetchall()
-        total_count = len(results)
-    except:
-        results = None
-    finally:
-        dbconn.close()
+        return page('index.html')
 
-    return render_template('results.html', results=results, 
-            total_count=total_count, n=0, q=q, p=0)
+    results = list(mcoll.find({'icao': q}))
+
+    return page('results.html', results=results,
+                total_count=len(results), n=0, q=q, p=0)
 
 
 @app.route('/search', methods=['GET', 'POST'])
@@ -88,90 +63,54 @@ def search():
         p = 0
         pass
 
-    # ICAO all upper cases
-    if n == 'icao':
-        q = q.upper()
+    if n in ['regid', 'icao', 'mdl']:
+        q = q.lower()
 
     if not q or not n:
         return redirect(url_for('index'))
-    
-    # received query param
-    try:
-        dbconn = connect_db()
-        cursor = dbconn.cursor()
 
-        count_sql = "SELECT COUNT(*) FROM `ids` WHERE `" + n + "` LIKE %s"
-        cursor.execute(count_sql, '%'+q+'%')
-        count =  cursor.fetchone()
-        total_count = count[count.keys()[0]]
+    # Now, let's query
+    total_count = mcoll.find({n: {'$regex': q}}).count()
 
-        fetch_sql = "SELECT * FROM `ids` WHERE `" + n + "` LIKE %s LIMIT %s,%s"
-        cursor.execute(fetch_sql, ('%'+q+'%', p*100, 100))
-        results =  cursor.fetchall()
-        # print cursor._last_executed
-    except Exception, e:
-        results = None
-        total_count = 0
-        print e
-    finally:
-        dbconn.close()
+    results = list(mcoll.find({n: {'$regex': q}}).skip(p*100).limit(100))
 
-    return render_template('results.html', results=results, 
-            total_count=total_count, n=n, q=q, p=p)
+    return page('results.html', results=results,
+                total_count=total_count, n=n, q=q, p=p)
 
-@app.route('/random')
-def random():
-    try:
-        dbconn = connect_db()
-        cursor = dbconn.cursor()
-        fetch_sql = "SELECT * FROM `ids` ORDER BY RAND() LIMIT 100"
-        cursor.execute(fetch_sql)
-        results =  cursor.fetchall()
-        total_count = len(results)
-    except:
-        results = None
-    finally:
-        dbconn.close()
 
-    return render_template('results.html', results=results, 
-            total_count=total_count, p=0, q=0, n=0)
+@app.route('/rand')
+def rand():
+    count = mcoll.find().count()
+    r = random.randint(1, count)
+    results = list(mcoll.find().skip(r).limit(30))
+    return page('results.html', results=results, total_count=30, p=0)
+
 
 @app.route('/stats')
 def stats():
-    try:
-        dbconn = connect_db()
-        cursor = dbconn.cursor()
-        data = {}
+    return page('stats.html')
 
-        sql = "SELECT `icao`, `regid`, `mdl`, `owner`  FROM `ids`";
-        cursor.execute(sql)
-        results =  cursor.fetchall()
 
-        # total count
-        data['total_acs'] = len(results)
+@app.route('/statdata')
+def statdata():
+    data = {
+        'mdls': statistics.mdls(),
+        'types': statistics.types(),
+        'operators': statistics.operators()
+    }
 
-        # owners stat
-        owners = [ r['owner'] for r in results ]
-        owner_counts = collections.Counter(owners)
-        data['owners'] = sorted(list(owner_counts.items()), 
-                key=lambda x: x[1], reverse=True)
+    r = Response(response=json.dumps(data), status=200,
+                 mimetype="application/json")
+    return(r)
 
-        # models stat
-        models = [ r['mdl'] for r in results ]
-        model_counts = collections.Counter(models)
-        data['models'] = sorted(list(model_counts.items()), 
-                key=lambda x: x[1], reverse=True)
-    except:
-        data = None
-    finally:
-        dbconn.close()
-    return render_template('stats.html', data=data)
 
 @app.route('/download')
 def download():
     folder = os.path.join(app.root_path, 'files')
-    return send_from_directory(directory=folder, 
-            filename='aircrafts_dump.csv', as_attachment=True)
+    return send_from_directory(
+        directory=folder, filename='aircrafts_dump.csv', as_attachment=True
+    )
+
 
 if __name__ == "__main__":
     app.run()

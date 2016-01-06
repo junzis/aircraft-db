@@ -8,6 +8,12 @@ http://junzisun.com/aif/
 
 You can download a CSV version of the data from above website.
 
+## instructions
+
+```sh
+$ pip install -r requirements.txt -t lib
+```
+
 --
 __IMPORTANT:__  
 THIS TOOL IS DISTRIBUTED UNDER MIT LICENSE. HOWEVER, YOU NEED TO OBTAIN A FLIGHTRADAR24 LICENSE IN ORDER TO USE AND DISTRIBUTE THEIR DATA. ONE POSSIBLE WAY IS TO BECOME A DATA PROVIDER FOR FR24. http://www.flightradar24.com/terms-and-conditions

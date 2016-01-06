@@ -1,8 +1,9 @@
 <!doctype html>
 <head>
-	<title>Aircraft ID Finder</title>
+	<title>World Aircraft DB</title>
 	<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
-	<script src="{{ url_for('static', filename='jquery-2.1.4.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='gacode.js') }}"></script>
 </head>
 
 <body>
@@ -19,7 +20,7 @@
 	{% endwith %}
 
 	<h1>
-		Aircraft ID Finder
+		World Aircraft Database
 		<div class="pull-right">
 			<a class="btn btn-sm btn-info" href="{{url_for('index')}}">Home</a>
 			<a class="btn btn-sm btn-info" href="{{url_for('stats')}}">Stats</a>
@@ -30,6 +31,44 @@
 	<hr/>
 
 	{% block body %}{% endblock %}
+
+	<hr/>
+
+	The software and data are distributed under <a href="#license" id='license-toggle'> The MIT License (MIT) </a> <br/>
+
+	Copyright (&copy) 2015, Junzi Sun @ TuDelft <br/><br/>
+	
+	Source code avaiable: <a href="https://github.com/junzis/aircraft-db">https://github.com/junzis/aircraft-db</a>
+
+	<div id="license-text" style="display:none">
+		<a name="license"></a>
+		<br/>
+		<div class="well well-sm">
+			Permission is hereby granted, free of charge, to any person obtaining a copy
+			of this software and associated documentation files (the "Software"), to deal
+			in the Software without restriction, including without limitation the rights
+			to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+			copies of the Software, and to permit persons to whom the Software is
+			furnished to do so, subject to the following conditions:
+
+			The above copyright notice and this permission notice shall be included in all
+			copies or substantial portions of the Software. <br/><br/>
+
+			THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+			IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+			FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+			AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+			LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+			OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+			SOFTWARE.
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		$("#license-toggle").click(function(){
+			$("#license-text").toggle();
+		})
+	</script>
 
 	</div>
 </body>

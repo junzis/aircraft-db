@@ -1,27 +1,25 @@
+<strong>Quick search by aircraft ICAO address </strong>
 <form method="post" accept-charset="utf-8" role="form" class="form-inline" action="{{url_for('index')}}">
 	<div class="form-group text required">
-		<input class="form-control" id="search-flight-id" name="q" required="required" style="font-family:courier;font-size:16px" />
+		<input class="form-control" id="search-flight-id" name="q" required="required" style="font-family:courier;font-size:16px" placeholder="0011AA" />
 	</div>
 	<div class="form-group">
 		<input type="submit" class="btn btn-primary btn btn-default" value="Search">
 	</div>
 </form>
 <div class="help-block">
-	You may search by <u>exact</u> ICAO address or registration ID. 
-	[ <a href="#" id='advance-search-toggle'>Advance Query</a> ]
+	<strong><a href="#" id='advance-search-toggle'> + Advance Query of aircraft type, model, tail number, or opeartor</a></strong>
 </div>
 
 <form id="advance-search-form" method="post" accept-charset="utf-8" role="form" class="form-inline" action="{{url_for('search')}}" style="display:none">
 	<div class="form-group">
 		<select class="form-control" name="n" required="required" >
 			<option value="">-- Select Field --</option>
-			<option value="icao">ICAO Addr.</option>
-			<option value="regid">Reg. ID</option>
-			<option value="mdl">Model Code</option>
-			<option value="type">Modle Type</option>
-			<option value="owner">Owner</option>
-			<option value="cs">Call Sign</option>
-			<option value="fn">Flight</option>
+			<option value="icao">ICAO Address</option>
+			<option value="regid">Reg. ID (tail no.)</option>
+			<option value="mdl">Model</option>
+			<option value="type">Aicraft Type</option>
+			<option value="owner">Opeartor</option>
 		</select>
 	</div>
 	<div class="form-group text required">

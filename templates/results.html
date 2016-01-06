@@ -30,28 +30,24 @@
 					<th>ICAO Addr.</th>
 					<th>Reg. ID</th>
 					<th>Model</th>
-					<th>Type</th>
-					<th>Owner</th>
-					<th>Call Sign (Last)</th>
-					<th>Flight (Last)</th>
-					<th>Updated</th>
+					<th>Aircraft Type</th>
+					<th>Opeartor</th>
+					<th>Timestamp</th>
 					<th>More</th>
 				</tr>
 			</thead>
 			{% for res in results %}
 			<tr>
-				<td>{{res['icao']}}</td>
-				<td>{{res['regid']}}</td>
-				<td>{{res['mdl']}}</td>
+				<td>{{res['icao']|upper}}</td>
+				<td>{{res['regid']|upper}}</td>
+				<td>{{res['mdl']|upper}}</td>
 				<td>
 					{{res['type']}} <a href="{{url_for('search', n='type', q=res['type'])}}">+</a>
 				</td>
 				<td>
-					{{res['owner']}} <a href="{{url_for('search', n='owner', q=res['owner'])}}">+</a>
+					{{res['operator']}} <a href="{{url_for('search', n='operator', q=res['operator'])}}">+</a>
 				</td>
-				<td>{{res['cs']}}</td>
-				<td>{{res['fn']}}</td>
-				<td>{{readtime(res['ts'])}}</td>
+				<td>{{res['ts'].strftime('%Y-%m-%d %H:%M')}}</td>
 				<td>
 					<a href="http://www.nullrefer.com/?http://www.flightradar24.com/data/airplanes/{{res['regid'].lower()}}/" target="_blank">Details</a>
 				</td>
@@ -61,7 +57,7 @@
 	{% else: %}
 		<div class="well well-sm">
 			No record found.. <br/><br/>
-		<a href="{{url_for('random')}}"> Show 100 Random Aircrafts</a>
+			<a href="{{url_for('rand')}}"> Show 100 Random Aircrafts</a>
 		</div>
 	{% endif %}
 

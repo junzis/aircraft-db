@@ -1,6 +1,13 @@
 {% extends "layout.html" %}
 
 {% block body %}
+
 	{% include 'search-box.html' %}
-	<a href="{{url_for('random')}}"> Show 100 Random Aircrafts</a>
+	
+	<div class="well well-sm">
+		<a href="{{url_for('rand')}}"> Show Some Random Aircrafts</a>
+		<br/><br/><br/><br/>
+	</div>
+	
 {% endblock %}
+

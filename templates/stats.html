@@ -1,39 +1,33 @@
 {% extends "layout.html" %}
 
 {% block body %}
-	<h2>Database Statistic</h2>
-	<hr/>
-	{% if data: %}
-		<h3 class="well well-sm"> {{data['total_acs']}} of identifiable aircrafts in DB </h3>
-		<hr/>
+    <script src="{{ url_for('static', filename='d3.min.js') }}"></script>
 
-		<h3>Number of aircraft by models</h3>
-		<div class="well well-sm">
-			{% for mdl in data['models'] %}
-				<span style="display:inline-block; width:130px;">
-					<span style="display:inline-block; width:40px;"> {{mdl[0]}} </span>
-					<span style="display:inline-block; width:40px;"> [<strong>{{mdl[1]}}</strong>] </span>
-				</span>
-			{% endfor %} 
-		</div>
+    <script type="text/javascript">
 
-		<h3>Number of aircraft by owners</h3>
-		<div class="well well-sm">
-			{% for owner in data['owners'] %}
-				<span style="display:inline-block; width:200px; 
-					border-bottom: 1px solid #000; margin-right:10px; padding-top:10px">
-					{{owner[0]}}
-					<a href="{{url_for('search', n='owner', q=owner[0])}}">+</a>
-					<br/>
-					[<strong>{{owner[1]}}</strong>] 
-				</span>
-			{% endfor %} 
-		</div>
+        function draw_top(data){
+            console.log(data)
+        }
 
-	{% else: %}
-		<div class="well well-sm">
-			No record found..
-		</div>
-	{% endif %}
+        d3.json("{{url_for('statdata')}}", function(err, data){
+            if (err) return console.warn(err);
+            draw_top(data);
+        })
+
+
+    </script>
+
+
+    <h3>Statistics</h3>
+    <hr/>
+
+    <h4>TOP 20</h4>
+    <hr/>
+
+    <h4>Aircraft Models</h4>
+    <hr/>
+
+    <h4>Airline operators</h4>
+    <hr/>
 
 {% endblock %}
