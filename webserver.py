@@ -6,14 +6,26 @@ import json
 import re
 import pymongo
 import random
-import statistics
+import datetime
 
 app = Flask(__name__)
 app.debug = True
 app.secret_key = '$1$rrxQdds52Zad2f3L$Qdqpy5ertyJ5dctHFd0/lTNsa35fa3'
 
 mclient = pymongo.MongoClient()
-mcoll = mclient.aif.aircraft
+mCollAC = mclient.adb.aircraft
+mCollStatMdl = mclient.adb.stat_mdl
+mCollStatOperator = mclient.adb.stat_operator
+mCollStatType = mclient.adb.stat_type
+
+
+def readtime(timestamp):
+    """Convert unix timestamp to human readable time"""
+    return datetime.datetime.fromtimestamp(
+            timestamp
+        ).strftime('%Y-%m-%d %H:%M:%S')
+
+app.jinja_env.globals.update(readtime=readtime)
 
 
 @app.errorhandler(404)
@@ -37,7 +49,7 @@ def index():
     if not q:
         return page('index.html')
 
-    results = list(mcoll.find({'icao': q}))
+    results = list(mCollAC.find({'icao': q}))
 
     return page('results.html', results=results,
                 total_count=len(results), n=0, q=q, p=0)
@@ -70,9 +82,9 @@ def search():
         return redirect(url_for('index'))
 
     # Now, let's query
-    total_count = mcoll.find({n: {'$regex': q}}).count()
+    total_count = mCollAC.find({n: {'$regex': q}}).count()
 
-    results = list(mcoll.find({n: {'$regex': q}}).skip(p*100).limit(100))
+    results = list(mCollAC.find({n: {'$regex': q}}).skip(p*100).limit(100))
 
     return page('results.html', results=results,
                 total_count=total_count, n=n, q=q, p=p)
@@ -80,9 +92,9 @@ def search():
 
 @app.route('/rand')
 def rand():
-    count = mcoll.find().count()
+    count = mCollAC.find().count()
     r = random.randint(1, count)
-    results = list(mcoll.find().skip(r).limit(30))
+    results = list(mCollAC.find().skip(r).limit(30))
     return page('results.html', results=results, total_count=30, p=0)
 
 
@@ -93,10 +105,22 @@ def stats():
 
 @app.route('/statdata')
 def statdata():
+    mdls = list(
+        mCollStatMdl.find({}, {'icaos': False}).sort('_id')
+    )
+
+    operators = list(
+        mCollStatOperator.find({}, {'icaos': False}).sort('_id')
+    )
+
+    types = list(
+        mCollStatType.find({}, {'icaos': False}).sort('_id')
+    )
+
     data = {
-        'mdls': statistics.mdls(),
-        'types': statistics.types(),
-        'operators': statistics.operators()
+        'mdls': mdls,
+        'types': types,
+        'operators': operators
     }
 
     r = Response(response=json.dumps(data), status=200,
@@ -108,7 +132,7 @@ def statdata():
 def download():
     folder = os.path.join(app.root_path, 'files')
     return send_from_directory(
-        directory=folder, filename='aircrafts_dump.csv', as_attachment=True
+        directory=folder, filename='aircraft_db.csv', as_attachment=True
     )
 
 

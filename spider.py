@@ -1,10 +1,8 @@
 import requests
 import re
 import time
-import datetime
-import pymongo
 from bs4 import BeautifulSoup
-
+from webserver import mCollAC
 
 base_url = "http://lhr.data.fr24.com/zones/fcgi/feed.js?faa=1&mlat=1&flarm=0" \
     "&adsb=1&gnd=1&air=1&vehicles=0&estimated=0&maxage=0&gliders=0&stats=1"
@@ -52,8 +50,8 @@ world_zones = [
     [-30, -90, -180, 180]
 ]
 
-mclient = pymongo.MongoClient()
-mcoll = mclient.aif.aircraft
+# using requests session to increace http performance
+r_session = requests.Session()
 
 
 def trim_label(label):
@@ -84,7 +82,7 @@ def get_ac(key, data):
         'regid': regid.lower(),
         'mdl': mdl.lower(),
         'fr24id': fr24id.lower(),
-        'ts': datetime.datetime.now(),
+        'ts': int(time.time()),
     }
 
     return ac
@@ -101,32 +99,35 @@ def fetch_all_acs():
     for url in urls:
 
         try:
-            response = requests.get(url)
+            response = r_session.get(url)
             data = response.json()
-        except:
+        except Exception, e:
+            # print e
             continue
 
         for key, val in data.iteritems():
             try:
                 ac = get_ac(key, val)
-            except:
+            except Exception, e:
+                # print e
                 continue
 
             # try to maintaion the type and operator information
-            ac_old = mcoll.find_one({'icao': ac['icao']})
-            if 'type' in ac_old:
-                ac['type'] = ac_old['type']
-            if 'operator' in ac_old:
-                ac['operator'] = ac_old['operator']
+            ac_old = mCollAC.find_one({'icao': ac['icao']})
+            if ac_old:
+                if 'type' in ac_old:
+                    ac['type'] = ac_old['type']
+                if 'operator' in ac_old:
+                    ac['operator'] = ac_old['operator']
 
-            mcoll.update({'icao': ac['icao']}, ac, upsert=True)
+            mCollAC.update({'icao': ac['icao']}, ac, upsert=True)
 
 
 def update_info(ac):
     url = "http://www.flightradar24.com/data/airplanes/" + ac['regid'].lower()
 
     try:
-        response = requests.get(url)
+        response = r_session.get(url)
         data = response.text
 
         soup = BeautifulSoup(data, "html5lib")
@@ -144,14 +145,14 @@ def update_info(ac):
         ac['type'] = info[3]
         ac['operator'] = trim_label(info[5])
 
-        mcoll.update({'icao': ac['icao']}, ac)
+        mCollAC.update({'icao': ac['icao']}, ac)
         return True
     except:
         return False
 
 
 def update_new_acs_info():
-    acs = mcoll.find({
+    acs = mCollAC.find({
         '$or': [
             {'type': {'$exists': False}},
             {'operator': {'$exists': False}}
@@ -163,15 +164,15 @@ def update_new_acs_info():
 
 
 def update_all_acs_info():
-    acs = mcoll.find()
+    acs = mCollAC.find()
     for ac in acs:
         update_info(ac)
         time.sleep(0.1)
 
 
 def trim_all_oeprator_labels():
-    acs = mcoll.find()
+    acs = mCollAC.find()
     for ac in acs:
         if 'operator' in ac:
             ac['operator'] = trim_label(ac['operator'])
-            mcoll.update({'icao': ac['icao']}, ac, upsert=True)
+            mCollAC.update({'icao': ac['icao']}, ac, upsert=True)

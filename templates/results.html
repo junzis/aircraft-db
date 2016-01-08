@@ -47,7 +47,7 @@
 				<td>
 					{{res['operator']}} <a href="{{url_for('search', n='operator', q=res['operator'])}}">+</a>
 				</td>
-				<td>{{res['ts'].strftime('%Y-%m-%d %H:%M')}}</td>
+				<td>{{readtime(res['ts'])}}</td>
 				<td>
 					<a href="http://www.nullrefer.com/?http://www.flightradar24.com/data/airplanes/{{res['regid'].lower()}}/" target="_blank">Details</a>
 				</td>

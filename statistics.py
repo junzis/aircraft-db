@@ -1,12 +1,9 @@
-import pymongo
-
-mclient = pymongo.MongoClient()
-mcollacs = mclient.aif.aircraft
+from webserver import mCollAC
 
 
 def aggregate():
     # aggregate mdl statistic
-    mcollacs.aggregate([
+    mCollAC.aggregate([
         {'$group': {
                 '_id': '$mdl',
                 'count': {'$sum': 1},
@@ -16,7 +13,7 @@ def aggregate():
     ])
 
     # aggregate operator statistic
-    mcollacs.aggregate([
+    mCollAC.aggregate([
         {'$group': {
                 '_id': '$operator',
                 'count': {'$sum': 1},
@@ -28,7 +25,7 @@ def aggregate():
     ])
 
     # aggregate operator statistic
-    mcollacs.aggregate([
+    mCollAC.aggregate([
         {'$group': {
                 '_id': '$type',
                 'count': {'$sum': 1},
@@ -37,27 +34,3 @@ def aggregate():
         }},
         {'$out': 'stat_type'}
     ])
-
-
-def mdls():
-    mcoll = mclient.aif.stat_mdl
-    data = list(
-        mcoll.find({}, {'icaos': False}).sort('_id')
-    )
-    return data
-
-
-def operators():
-    mcoll = mclient.aif.stat_operator
-    data = list(
-        mcoll.find({}, {'icaos': False}).sort('_id')
-    )
-    return data
-
-
-def types():
-    mcoll = mclient.aif.stat_type
-    data = list(
-        mcoll.find({}, {'icaos': False}).sort('_id')
-    )
-    return data

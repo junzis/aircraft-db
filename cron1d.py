@@ -1,5 +1,6 @@
 import spider
 import statistics
+import export
 
 """
 Script to run every day
@@ -11,4 +12,5 @@ spider.update_new_acs_info()
 # aggregate statistics of mdl, typ, and airlines
 statistics.aggregate()
 
-# TODO: generate CSV data
+# generate CSV data
+export.adb2csv()

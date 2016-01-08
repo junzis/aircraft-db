@@ -1,22 +1,40 @@
 import os
-import shutil
+import csv
+from webserver import mCollAC
 
-tmp_file = '/tmp/aircrafts_dump.csv'
 
-try:
+def adb2csv():
+    try:
+        csvfilepath = os.path.dirname(os.path.realpath(__file__)) \
+            + '/files/aircraft_db.csv'
 
-    # check if tmp file is existing
-    if os.path.isfile(tmp_file):
-        os.remove(tmp_file)
+        # check if tmp file is existing
+        if os.path.isfile(csvfilepath):
+            os.remove(csvfilepath)
 
-    # TODO: add process to export mongo DB to csv
+        fcsv = open(csvfilepath, 'wt')
+        csvout = csv.writer(fcsv)
 
-    # move the csv file to downloadable location
-    new_file = os.path.dirname(os.path.realpath(__file__)) \
-        + '/files/aircrafts_dump.csv'
+        fields = ['icao', 'regid', 'mdl', 'type', 'operator']
 
-    shutil.move(tmp_file, new_file)
-    print "success: file exported"
-except Exception, e:
-    print 'error occoured...'
-    print e
+        csvout.writerow(fields)
+
+        res = mCollAC.find()
+        for r in res:
+            line = []
+            for f in fields:
+                if f in r.keys():
+                    if r[f]:
+                        v = r[f].encode('ascii', 'ignore').upper()
+                        line.append(v)
+                    else:
+                        line.append('NONE')
+                else:
+                    line.append('NONE')
+            csvout.writerow(line)
+        fcsv.close()
+
+        print "success: file exported"
+    except Exception, e:
+        print 'error occoured...'
+        print e
