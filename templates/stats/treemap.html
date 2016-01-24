@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<h3>Statistics of airline fleet</h3>
+<div id="chart_airlne" style="height: 600px;"></div>
+
+<hr/>
+
+<h3>Statistics of Aircrafts</h3>
+<div id="chart_aircraft" style="height: 600px;"></div>
+
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+    google.charts.load('current', {'packages':['treemap']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        var options1 = {
+            highlightOnMouseOver: true,
+            maxDepth: 1,
+            maxPostDepth: 2,
+            minHighlightColor: '#8c6bb1',
+            midHighlightColor: '#9ebcda',
+            maxHighlightColor: '#edf8fb',
+            minColor: '#009688',
+            midColor: '#f7f7f7',
+            maxColor: '#ee8100',
+            headerHeight: 20,
+            showScale: true,
+            useWeightedAverageForAggregation: true,
+            generateTooltip: tooltip1
+        };
+
+        var options2 = {
+            highlightOnMouseOver: true,
+            maxDepth: 1,
+            maxPostDepth: 2,
+            minHighlightColor: '#8c6bb1',
+            midHighlightColor: '#9ebcda',
+            maxHighlightColor: '#edf8fb',
+            minColor: '#998ec3',
+            midColor: '#f7f7f7',
+            maxColor: '#f1a340',
+            headerHeight: 20,
+            showScale: true,
+            useWeightedAverageForAggregation: true,
+            generateTooltip: tooltip2
+        };
+
+        var data1 = new google.visualization.DataTable();
+        data1.addColumn('string', 'ID');
+        data1.addColumn('string', 'Parent');
+        data1.addColumn('number', 'Count');
+        data1.addRows({{ data1|safe }})
+        var tree1 = new google.visualization.TreeMap(document.getElementById('chart_airlne'));
+        tree1.draw(data1, options1);
+
+        var data2 = new google.visualization.DataTable();
+        data2.addColumn('string', 'ID');
+        data2.addColumn('string', 'Parent');
+        data2.addColumn('number', 'Count');
+        data2.addRows({{ data2|safe }})
+        var tree1 = new google.visualization.TreeMap(document.getElementById('chart_aircraft'));
+        tree1.draw(data2, options2);
+
+        function tooltip1(row, size, value) {
+            return '<div style="background:#fd9; padding:5px; border-style:solid; font-weight:bold">' 
+            + data1.getValue(row, 0) + '<br>' 
+            + 'Count: ' + data1.getValue(row, 2) + '<br>'
+            + ' </div>';
+        }
+
+        function tooltip2(row, size, value) {
+            return '<div style="background:#fd9; padding:5px; border-style:solid; font-weight:bold">' 
+            + data2.getValue(row, 0) + '<br>' 
+            + 'Count: ' + data2.getValue(row, 2) + '<br>'
+            + ' </div>';
+        }
+
+    }
+
+
+</script>
+
+
+{% endblock %}

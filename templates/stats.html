@@ -1,33 +1,22 @@
 {% extends "layout.html" %}
 
 {% block body %}
-    <script src="{{ url_for('static', filename='d3.min.js') }}"></script>
-
-    <script type="text/javascript">
-
-        function draw_top(data){
-            console.log(data)
-        }
-
-        d3.json("{{url_for('statdata')}}", function(err, data){
-            if (err) return console.warn(err);
-            draw_top(data);
-        })
-
-
-    </script>
-
 
     <h3>Statistics</h3>
     <hr/>
 
-    <h4>TOP 20</h4>
-    <hr/>
+    <a class="btn btn-success" href="{{url_for('top20')}}"> View TOP (20) Statistics </a>
 
-    <h4>Aircraft Models</h4>
-    <hr/>
+    <br/><br/>
 
-    <h4>Airline operators</h4>
-    <hr/>
+    <a class="btn btn-success" href="{{url_for('treemap')}}"> Airline and Airraft Treemap </a>
+
+    <br/><br/>
+
+    <a class="btn btn-success" href="{{url_for('realtime_density')}}"> Realtime Airtrafic Density </a>
+
+    <br/><br/>
+
+    <a class="btn btn-success" href="{{url_for('realtime_traffic')}}"> Realtime Airport Traffic </a>
 
 {% endblock %}

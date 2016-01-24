@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    <h3>Statistics</h3>
+    <hr/>
+
+    {% for plt in plots %}
+        {{ plt[0] |indent(4)|safe }}
+        {{ plt[1] |indent(4)|safe }}
+    {% endfor %}
+    <hr/>
+
+
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<h3>Realtime Airtrafic Density</h3>
+Number of aircraft flying over each country now at: 
+<script> var d = new Date(); document.write(d.toLocaleString()); </script>
+<hr/>
+
+<div id="country_chart" style="height: 600px;"></div>
+
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+<script>
+    google.charts.load('current', {'packages':['geochart']});
+    google.charts.setOnLoadCallback(drawRegionsMap);
+
+    function drawRegionsMap() {
+        var data = google.visualization.arrayToDataTable( {{data|safe}} );
+        console.log(data)
+
+        var options = {};
+
+        var chart = new google.visualization.GeoChart(document.getElementById('country_chart'));
+
+        chart.draw(data, options);
+    }
+</script>
+
+
+{% endblock %}

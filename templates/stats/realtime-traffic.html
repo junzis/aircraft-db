@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<h3>Realtime airtrafic between airports</h3>
+Number of aircraft flying over each country now at: 
+<script> var d = new Date(); document.write(d.toLocaleString()); </script>
+<hr/>
+
+{{ script |indent(4)|safe }}
+{{ div |indent(4)|safe }}
+
+
+{% endblock %}

@@ -1,12 +1,13 @@
 from flask import render_template as page
 from flask import Flask, redirect, url_for, request, \
-                  send_from_directory, Response
+                  send_from_directory
 import os
 import json
 import re
 import pymongo
 import random
 import datetime
+import statistics
 
 app = Flask(__name__)
 app.debug = True
@@ -103,29 +104,69 @@ def stats():
     return page('stats.html')
 
 
-@app.route('/statdata')
-def statdata():
-    mdls = list(
-        mCollStatMdl.find({}, {'icaos': False}).sort('_id')
-    )
+@app.route('/stats/top')
+def top20():
+    scripts = []
+    divs = []
 
-    operators = list(
-        mCollStatOperator.find({}, {'icaos': False}).sort('_id')
-    )
+    s, d = statistics.top_mdl()
+    scripts.append(s)
+    divs.append(d)
 
-    types = list(
-        mCollStatType.find({}, {'icaos': False}).sort('_id')
-    )
+    s, d = statistics.top_operator()
+    scripts.append(s)
+    divs.append(d)
 
-    data = {
-        'mdls': mdls,
-        'types': types,
-        'operators': operators
-    }
+    return page('stats/top.html', plots=zip(scripts, divs))
 
-    r = Response(response=json.dumps(data), status=200,
-                 mimetype="application/json")
-    return(r)
+
+@app.route('/stats/treemap')
+def treemap():
+    data1, data2 = statistics.treemaps()
+    return page('stats/treemap.html', data1=json.dumps(data1),
+                data2=json.dumps(data2))
+
+
+@app.route('/stats/realtime/density')
+def realtime_density():
+    import spider
+    import reverse_geocode
+
+    acs = spider.fetch_all_acs(withpos=True)
+    coordinates = [(i['lat'], i['lon']) for i in acs]
+
+    geos = reverse_geocode.search(coordinates)
+
+    countries = {}
+    for g in geos:
+        c = g['country']
+        if c in countries:
+            countries[c] += 1
+        else:
+            countries[c] = 1
+
+    data = []
+    data.append(['Country', 'Air traffic density'])
+    data[1:] = [[c, cnt] for c, cnt in countries.iteritems()]
+
+    return page('stats/realtime-density.html', data=json.dumps(data))
+
+
+@app.route('/stats/realtime/traffic')
+def realtime_traffic():
+    # import spider
+    # import numpy as np
+    # from bokeh.plotting import figure, show, output_file
+    # from bokeh.models import HoverTool, ColumnDataSource
+    # from bokeh.embed import components
+    # from bokeh.sampledata.les_mis import data
+
+    # acs = spider.fetch_all_acs(withspd=True)
+
+    # script, div = components(p)
+
+    # return page('stats/realtime-traffic.html', script=script, div=div)
+    return page('stats/realtime-traffic.html')
 
 
 @app.route('/download')

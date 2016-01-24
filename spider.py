@@ -70,6 +70,10 @@ def get_ac(key, data):
 
     # get aircraft ids
     icao = data[0]
+    lat = data[1]
+    lon = data[2]
+    hdg = data[3]
+    spd = data[5]
     regid = data[9]
     mdl = data[8]
     fr24id = key
@@ -79,6 +83,10 @@ def get_ac(key, data):
 
     ac = {
         'icao': icao.lower(),
+        'lat': lat,
+        'lon': lon,
+        'hdg': hdg,
+        'spd': spd,
         'regid': regid.lower(),
         'mdl': mdl.lower(),
         'fr24id': fr24id.lower(),
@@ -88,13 +96,14 @@ def get_ac(key, data):
     return ac
 
 
-def fetch_all_acs():
+def fetch_all_acs(withpos=False, withspd=False):
     urls = []
     for zone in world_zones:
         bounds = ','.join(str(d) for d in zone)
         url = base_url + "&bounds=" + bounds
         urls.append(url)
 
+    acs = []
     # ---- Get all the online aircraft from FR24 and update DB ----
     for url in urls:
 
@@ -108,19 +117,30 @@ def fetch_all_acs():
         for key, val in data.iteritems():
             try:
                 ac = get_ac(key, val)
+                if not withpos:
+                    del ac['lat']
+                    del ac['lon']
+                if not withspd:
+                    del ac['spd']
+                    del ac['hdg']
+                acs.append(ac)
             except Exception, e:
                 # print e
                 continue
+    return acs
 
-            # try to maintaion the type and operator information
-            ac_old = mCollAC.find_one({'icao': ac['icao']})
-            if ac_old:
-                if 'type' in ac_old:
-                    ac['type'] = ac_old['type']
-                if 'operator' in ac_old:
-                    ac['operator'] = ac_old['operator']
 
-            mCollAC.update({'icao': ac['icao']}, ac, upsert=True)
+def update_all_acs():
+    acs = fetch_all_acs()
+    for ac in acs:
+        ac_old = mCollAC.find_one({'icao': ac['icao']})
+        if ac_old:
+            if 'type' in ac_old:
+                ac['type'] = ac_old['type']
+            if 'operator' in ac_old:
+                ac['operator'] = ac_old['operator']
+
+        mCollAC.update({'icao': ac['icao']}, ac, upsert=True)
 
 
 def update_info(ac):
