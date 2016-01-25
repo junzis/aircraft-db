@@ -99,6 +99,14 @@ def rand():
     return page('results.html', results=results, total_count=30, p=0)
 
 
+@app.route('/download')
+def download():
+    folder = os.path.join(app.root_path, 'files')
+    return send_from_directory(
+        directory=folder, filename='aircraft_db.csv', as_attachment=True
+    )
+
+
 @app.route('/stats')
 def stats():
     return page('stats.html')
@@ -129,52 +137,15 @@ def treemap():
 
 @app.route('/stats/realtime/density')
 def realtime_density():
-    import spider
-    import reverse_geocode
-
-    acs = spider.fetch_all_acs(withpos=True)
-    coordinates = [(i['lat'], i['lon']) for i in acs]
-
-    geos = reverse_geocode.search(coordinates)
-
-    countries = {}
-    for g in geos:
-        c = g['country']
-        if c in countries:
-            countries[c] += 1
-        else:
-            countries[c] = 1
-
-    data = []
-    data.append(['Country', 'Air traffic density'])
-    data[1:] = [[c, cnt] for c, cnt in countries.iteritems()]
-
+    flag = request.args.get('flag')
+    data = statistics.realtime_density(flag)
     return page('stats/realtime-density.html', data=json.dumps(data))
 
 
 @app.route('/stats/realtime/traffic')
 def realtime_traffic():
-    # import spider
-    # import numpy as np
-    # from bokeh.plotting import figure, show, output_file
-    # from bokeh.models import HoverTool, ColumnDataSource
-    # from bokeh.embed import components
-    # from bokeh.sampledata.les_mis import data
-
-    # acs = spider.fetch_all_acs(withspd=True)
-
-    # script, div = components(p)
-
-    # return page('stats/realtime-traffic.html', script=script, div=div)
-    return page('stats/realtime-traffic.html')
-
-
-@app.route('/download')
-def download():
-    folder = os.path.join(app.root_path, 'files')
-    return send_from_directory(
-        directory=folder, filename='aircraft_db.csv', as_attachment=True
-    )
+    data = statistics.realtime_traffic()
+    return page('stats/realtime-traffic.html', data=json.dumps(data))
 
 
 if __name__ == "__main__":

@@ -4,7 +4,10 @@
 
 <h3>Realtime Airtrafic Density</h3>
 Number of aircraft flying over each country now at: 
-<script> var d = new Date(); document.write(d.toLocaleString()); </script>
+<script> var d = new Date(); document.write(d.toLocaleString()); </script>.
+<br>
+<a class="btn btn-xs btn-default" href="{{url_for('realtime_density')}}">Original Data</a>
+<a class="btn btn-xs btn-default" href="{{url_for('realtime_density', flag='norm')}}">Logarithmic Transform</a>
 <hr/>
 
 <div id="country_chart" style="height: 600px;"></div>

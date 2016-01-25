@@ -1,10 +1,11 @@
-import flask
 import pymongo
 from bokeh.embed import components
 from bokeh.util.string import encode_utf8
-
 from bokeh.charts import Bar
 from bokeh.charts.attributes import cat, color
+import spider
+import reverse_geocode
+import numpy as np
 
 mclient = pymongo.MongoClient()
 mCollAC = mclient.adb.aircraft
@@ -160,6 +161,37 @@ def treemaps():
         data2.append([m, 'All', c])
 
     return data1, data2
+
+
+def realtime_density(flag=None):
+    acs = spider.fetch_all_acs(withpos=True)
+    coordinates = [(i['lat'], i['lon']) for i in acs]
+
+    geos = reverse_geocode.search(coordinates)
+
+    countries = {}
+    for g in geos:
+        c = g['country']
+        if c in countries:
+            countries[c] += 1
+        else:
+            countries[c] = 1
+
+    data = []
+    data.append(['Country', 'Air traffic density'])
+    for c, cnt in countries.iteritems():
+        if flag == 'norm':
+            data.append([c, np.log(cnt)])
+        else:
+            data.append([c, cnt])
+
+    return data
+
+
+def realtime_traffic():
+    acs = spider.fetch_all_acs(withpos=True, withspd=True)
+    data = [(i['lat'], i['lon'], i['spd'], np.radians(i['hdg'])) for i in acs]
+    return data
 
 
 def aggregate():
