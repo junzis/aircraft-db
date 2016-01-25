@@ -1,8 +1,8 @@
 import requests
 import re
 import time
+import pymongo
 from bs4 import BeautifulSoup
-from webserver import mCollAC
 
 base_url = "http://lhr.data.fr24.com/zones/fcgi/feed.js?faa=1&mlat=1&flarm=0" \
     "&adsb=1&gnd=1&air=1&vehicles=0&estimated=0&maxage=0&gliders=0&stats=1"
@@ -52,6 +52,9 @@ world_zones = [
 
 # using requests session to increace http performance
 r_session = requests.Session()
+
+mclient = pymongo.MongoClient()
+mCollAC = mclient.adb.aircraft
 
 
 def trim_label(label):
