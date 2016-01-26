@@ -53,7 +53,7 @@ def top_mdl(num=20):
         data,
         values='count',
         label=cat('mdl', sort=False),
-        stack='type',
+        stack=cat('type', sort=False),
         xlabel='Model',
         ylabel='Number of aircraft',
         color=color(columns=('mdl', 'type'), palette=palette, sort=False),
