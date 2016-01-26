@@ -24,7 +24,7 @@ Number of aircraft flying over each country now at:
         var data = google.visualization.arrayToDataTable( {{data|safe}} );
         console.log(data)
 
-        var options = {};
+        var options = {colorAxis: {colors: ['#deebf7', '#3182bd']}};
 
         var chart = new google.visualization.GeoChart(document.getElementById('country_chart'));
 

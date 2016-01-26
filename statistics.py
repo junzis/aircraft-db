@@ -142,7 +142,7 @@ def treemaps():
     data2.append(['All', None, 0])
 
     types = mCollStatType.find(
-        {'count': {'$gt': 10}},
+        {'count': {'$gt': 50}},
         {'icaos': False}
     ).sort('count', -1)
 
@@ -153,18 +153,17 @@ def treemaps():
         data2.append([t['_id'], M, t['count']])
 
         if M in mdls2:
-            mdls2[M] += 1
+            mdls2[M] += t['count']
         else:
-            mdls2[M] = 1
+            mdls2[M] = t['count']
 
     for m, c in mdls2.iteritems():
         data2.append([m, 'All', c])
 
-
     return data1, data2
 
 
-def realtime_density(flag=None):
+def realtime_geo_histo(flag=None):
     acs = spider.fetch_all_acs(withpos=True)
     coordinates = [(i['lat'], i['lon']) for i in acs]
 
@@ -193,6 +192,47 @@ def realtime_traffic():
     acs = spider.fetch_all_acs(withpos=True, withspd=True)
     data = [(i['lat'], i['lon'], i['spd'], np.radians(i['hdg'])) for i in acs]
     return data
+
+
+def realtime_density_plot():
+    import numpy as np
+    import scipy.stats
+    from matplotlib import pyplot as plt
+
+    acs = spider.fetch_all_acs(withpos=True, withspd=True)
+    data = [(i['lat'], i['lon']) for i in acs]
+    datanp = np.array(data)
+
+    x1 = np.array(datanp[:, 1])
+    y1 = np.array(datanp[:, 0])
+
+    xmin = x1.min()
+    xmax = x1.max()
+    ymin = y1.min()
+    ymax = y1.max()
+
+    X, Y = np.mgrid[xmin:xmax:100j, ymin:ymax:100j]
+    positions = np.vstack([X.ravel(), Y.ravel()])
+    values = np.vstack([x1, y1])
+    kernel = scipy.stats.gaussian_kde(values)
+    Z = np.reshape(kernel(positions).T, X.shape)
+
+    plt.figure(figsize=(12, 5))
+    im = plt.imshow(np.rot90(Z), cmap=plt.cm.gist_earth_r,
+                    extent=[xmin, xmax, ymin, ymax], aspect='auto')
+    plt.scatter(x1, y1, c='k', marker='.', s=1, lw=0)
+    plt.contour(X, Y, Z, linewidths=0.5)
+    # cbar1 = plt.colorbar(shrink=0.8)
+    # cbar1.ax.tick_params(labelsize=10)
+    cbar2 = plt.colorbar(im)
+    cbar2.ax.tick_params(labelsize=10)
+    plt.xlim([X.min(), X.max()])
+    plt.ylim([Y.min(), Y.max()])
+    plt.grid()
+    plt.xlabel('Latitude')
+    plt.ylabel('Longitude')
+    plt.savefig("static/density_plot.png", bbox_inches='tight')
+    return
 
 
 def aggregate():
@@ -233,4 +273,4 @@ def aggregate():
     ])
 
 if __name__ == '__main__':
-    df = top_mdl()
+    df = realtime_density_plot()

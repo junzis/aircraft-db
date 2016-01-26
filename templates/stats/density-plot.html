@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    <h3>Real-time air traffic density plot</h3>
+    <hr/>
+    	<img src="{{url_for('static', filename='density_plot.png')}}" />
+    <hr/>
+
+
+{% endblock %}

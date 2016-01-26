@@ -135,11 +135,11 @@ def treemap():
                 data2=json.dumps(data2))
 
 
-@app.route('/stats/realtime/density')
-def realtime_density():
+@app.route('/stats/realtime/histo')
+def realtime_geo_histo():
     flag = request.args.get('flag')
-    data = statistics.realtime_density(flag)
-    return page('stats/realtime-density.html', data=json.dumps(data))
+    data = statistics.realtime_geo_histo(flag)
+    return page('stats/realtime-geo-histo.html', data=json.dumps(data))
 
 
 @app.route('/stats/realtime/traffic')
@@ -147,6 +147,11 @@ def realtime_traffic():
     data = statistics.realtime_traffic()
     return page('stats/realtime-traffic.html', data=json.dumps(data))
 
+
+@app.route('/stats/realtime/density-plot')
+def realtime_density_plot():
+    data = statistics.realtime_density_plot()
+    return page('stats/density-plot.html', data=json.dumps(data))
 
 if __name__ == "__main__":
     app.run()
