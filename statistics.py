@@ -105,7 +105,7 @@ def top_operator(num=20):
         ylabel='Number of aircraft',
         color='#31a354',
         tooltips=[('Model', '@mdl'), ('Operator', '@operator')],
-        title="Aircraft Mperator Statistic",
+        title="Aircraft Operator Statistic",
         plot_width=800
     )
 
@@ -142,23 +142,24 @@ def treemaps():
     data2.append(['All', None, 0])
 
     types = mCollStatType.find(
-        {'count': {'$gt': 50}},
+        {'count': {'$gt': 10}},
         {'icaos': False}
     ).sort('count', -1)
 
-    mdls = {}
+    mdls2 = {}
 
     for t in types:
-        M = t['mdl'].upper()
+        M = t['mdl'].strip().upper()
         data2.append([t['_id'], M, t['count']])
 
-        if M in mdls:
-            mdls[M] += 1
+        if M in mdls2:
+            mdls2[M] += 1
         else:
-            mdls[M] = 1
+            mdls2[M] = 1
 
-    for m, c in mdls.iteritems():
+    for m, c in mdls2.iteritems():
         data2.append([m, 'All', c])
+
 
     return data1, data2
 
