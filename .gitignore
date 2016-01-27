@@ -1,7 +1,8 @@
-/.vagrant
 files
 !empty
 .DS_Store
+stat
+/static/density_plot.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
