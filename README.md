@@ -4,15 +4,9 @@ This tool uses FlightRadar24 as data source, building a database of aircraft ID 
 
 An operational and licensed version of the tool database running at: 
 
-http://junzisun.com/aif/
+http://junzisun.com/adb/
 
 You can download a CSV version of the data from above website.
-
-## instructions
-
-```sh
-$ pip install -r requirements.txt -t lib
-```
 
 --
 __IMPORTANT:__  
