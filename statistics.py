@@ -197,6 +197,8 @@ def realtime_traffic():
 def realtime_density_plot():
     import numpy as np
     import scipy.stats
+    import matplotlib
+    matplotlib.use('Agg')
     from matplotlib import pyplot as plt
 
     acs = spider.fetch_all_acs(withpos=True, withspd=True)
