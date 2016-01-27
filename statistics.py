@@ -195,11 +195,11 @@ def realtime_traffic():
 
 
 def realtime_density_plot():
+    import os
     import numpy as np
     import scipy.stats
-    import matplotlib
-    matplotlib.use('Agg')
     from matplotlib import pyplot as plt
+    dirpath = os.path.dirname(os.path.abspath(__file__))
 
     acs = spider.fetch_all_acs(withpos=True, withspd=True)
     data = [(i['lat'], i['lon']) for i in acs]
@@ -233,7 +233,7 @@ def realtime_density_plot():
     plt.grid()
     plt.xlabel('Latitude')
     plt.ylabel('Longitude')
-    plt.savefig("static/density_plot.png", bbox_inches='tight')
+    plt.savefig(dirpath+"/static/density_plot.png", bbox_inches='tight')
     return
 
 
