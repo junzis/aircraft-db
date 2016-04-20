@@ -5,4 +5,4 @@ Script to run every day
 """
 
 # fetch aircrafts that are online now
-spider.update_all_acs()
+spider.fetch_online_aircraft()

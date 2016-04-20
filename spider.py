@@ -7,6 +7,8 @@ from bs4 import BeautifulSoup
 base_url = "http://lhr.data.fr24.com/zones/fcgi/feed.js?faa=1&mlat=1&flarm=0" \
     "&adsb=1&gnd=1&air=1&vehicles=0&estimated=0&maxage=0&gliders=0&stats=1"
 
+flight_url = "https://api.flightradar24.com/common/v1/flight-playback.json?flightId=%s"
+
 # """ Divid the earth surface into 252 zones for querying aircraft data """
 # zones = []
 # for i in xrange(7):
@@ -51,7 +53,8 @@ world_zones = [
 ]
 
 # using requests session to increace http performance
-r_session = requests.Session()
+s = requests.Session()
+s.headers.update({'user-agent': 'Mozilla/5.0'})
 
 mclient = pymongo.MongoClient()
 mCollAC = mclient.adb.aircraft
@@ -73,10 +76,6 @@ def get_ac(key, data):
 
     # get aircraft ids
     icao = data[0]
-    lat = data[1]
-    lon = data[2]
-    hdg = data[3]
-    spd = data[5]
     regid = data[9]
     mdl = data[8]
     fr24id = key
@@ -86,10 +85,6 @@ def get_ac(key, data):
 
     ac = {
         'icao': icao.lower(),
-        'lat': lat,
-        'lon': lon,
-        'hdg': hdg,
-        'spd': spd,
         'regid': regid.lower(),
         'mdl': mdl.lower(),
         'fr24id': fr24id.lower(),
@@ -99,7 +94,7 @@ def get_ac(key, data):
     return ac
 
 
-def fetch_all_acs(withpos=False, withspd=False):
+def fetch_online_aircraft():
     urls = []
     for zone in world_zones:
         bounds = ','.join(str(d) for d in zone)
@@ -107,34 +102,25 @@ def fetch_all_acs(withpos=False, withspd=False):
         urls.append(url)
 
     acs = []
+
     # ---- Get all the online aircraft from FR24 and update DB ----
     for url in urls:
-
         try:
-            response = r_session.get(url)
+            response = s.get(url)
             data = response.json()
         except Exception, e:
-            # print e
+            print e
             continue
 
         for key, val in data.iteritems():
             try:
                 ac = get_ac(key, val)
-                if not withpos:
-                    del ac['lat']
-                    del ac['lon']
-                if not withspd:
-                    del ac['spd']
-                    del ac['hdg']
                 acs.append(ac)
             except Exception, e:
                 # print e
                 continue
-    return acs
 
-
-def update_all_acs():
-    acs = fetch_all_acs()
+    # Update or insert record
     for ac in acs:
         ac_old = mCollAC.find_one({'icao': ac['icao']})
         if ac_old:
@@ -145,28 +131,20 @@ def update_all_acs():
 
         mCollAC.update({'icao': ac['icao']}, ac, upsert=True)
 
+    return acs
+
 
 def update_info(ac):
-    url = "http://www.flightradar24.com/data/airplanes/" + ac['regid'].lower()
+    url = flight_url % ac['fr24id'].lower()
 
     try:
-        response = r_session.get(url)
-        data = response.text
+        response = s.get(url)
+        data = response.json()
 
-        soup = BeautifulSoup(data, "html5lib")
+        d = data['result']['response']['data']['flight']['aircraft']
 
-        info = []
-        for node in soup.find(id="cntAircraftDetails").dl.find_all('dd'):
-            info.append(node.find_all(text=True)[0])
-
-        if len(info) < 6:
-            return False
-
-        if info[3] == '-' or info[5] == '-':
-            return False
-
-        ac['type'] = info[3]
-        ac['operator'] = trim_label(info[5])
+        ac['operator'] = trim_label(d['owner'])
+        ac['type'] = d['model']['text']
 
         mCollAC.update({'icao': ac['icao']}, ac)
         return True
@@ -181,16 +159,16 @@ def update_new_acs_info():
             {'operator': {'$exists': False}}
         ]
     })
-    for ac in acs:
-        update_info(ac)
-        time.sleep(0.1)
 
+    total_count = acs.count()
+    count = 0
 
-def update_all_acs_info():
-    acs = mCollAC.find()
     for ac in acs:
+        count += 1
+        print "%d of %d updated" % (count, total_count)
+
         update_info(ac)
-        time.sleep(0.1)
+        time.sleep(0.5)
 
 
 def trim_all_oeprator_labels():

@@ -1,6 +1,5 @@
 from flask import render_template as page
-from flask import Flask, redirect, url_for, request, \
-                  send_from_directory
+from flask import Flask, redirect, url_for, request, send_from_directory
 import os
 import json
 import re
@@ -22,9 +21,8 @@ mCollStatType = mclient.adb.stat_type
 
 def readtime(timestamp):
     """Convert unix timestamp to human readable time"""
-    return datetime.datetime.fromtimestamp(
-            timestamp
-        ).strftime('%Y-%m-%d %H:%M:%S')
+    return datetime.datetime.fromtimestamp(timestamp) \
+        .strftime('%Y-%m-%d %H:%M:%S')
 
 app.jinja_env.globals.update(readtime=readtime)
 
@@ -109,49 +107,9 @@ def download():
 
 @app.route('/stats')
 def stats():
-    return page('stats.html')
-
-
-@app.route('/stats/top')
-def top20():
-    scripts = []
-    divs = []
-
-    s, d = statistics.top_mdl()
-    scripts.append(s)
-    divs.append(d)
-
-    s, d = statistics.top_operator()
-    scripts.append(s)
-    divs.append(d)
-
-    return page('stats/top.html', plots=zip(scripts, divs))
-
-
-@app.route('/stats/treemap')
-def treemap():
     data1, data2 = statistics.treemaps()
-    return page('stats/treemap.html', data1=json.dumps(data1),
-                data2=json.dumps(data2))
+    return page('stats.html', data1=json.dumps(data1), data2=json.dumps(data2))
 
-
-@app.route('/stats/realtime/histo')
-def realtime_geo_histo():
-    flag = request.args.get('flag')
-    data = statistics.realtime_geo_histo(flag)
-    return page('stats/realtime-geo-histo.html', data=json.dumps(data))
-
-
-@app.route('/stats/realtime/traffic')
-def realtime_traffic():
-    data = statistics.realtime_traffic()
-    return page('stats/realtime-traffic.html', data=json.dumps(data))
-
-
-@app.route('/stats/realtime/density-plot')
-def realtime_density_plot():
-    data = statistics.realtime_density_plot()
-    return page('stats/density-plot.html', data=json.dumps(data))
 
 if __name__ == "__main__":
     app.run()
