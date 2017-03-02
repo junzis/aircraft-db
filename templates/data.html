@@ -6,7 +6,9 @@
   <div class="panel-heading">Download</div>
   <div class="panel-body">
     <br/>
-      <a href="{{url_for('download')}}"> Click to download dataset (.csv format, compressed) </a>
+    <a href="{{url_for('download')}}" class="btn btn-sm btn-info"> Click to download dataset </a>
+    <br/>
+    .csv format, compressed
     <br/><br/>
   </div>
 </div>
@@ -17,8 +19,23 @@
   <div class="panel-heading">Cite this source</div>
   <div class="panel-body">
     <br/>
+    <strong>
     Sun, J. ({{ now.year }}). World Aircraft Database [Data file]. Retrieved from http://junzis.com/adb/data
-    <br/><br/>
+    </strong>
+    <br/>
+
+    <hr/>
+or, in bibtex:
+<pre>
+@misc{Sun2017adb,
+  author = {Sun, Junzi},
+  year = {{ now.year }},
+  title = {World Aircraft Database [Data file]},
+  note = {Retrieved from http://junzis.com/adb/data}
+}
+</pre>
+
+    <br/>
   </div>
 </div>
 
