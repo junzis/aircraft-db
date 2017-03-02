@@ -9,7 +9,7 @@ THIS TOOL IS DISTRIBUTED UNDER MIT LICENSE. HOWEVER, YOU NEED TO OBTAIN A FLIGHT
 
 This tool uses FlightRadar24 as data source, building a database of aircraft ID and related information.
 
-An operational and licensed version of the tool database running at: 
+An operational and licensed version of the tool database running at:
 
 http://junzisun.com/adb/
 

@@ -110,7 +110,7 @@ def data():
 def download():
     folder = os.path.join(app.root_path, 'files')
     return send_from_directory(
-        directory=folder, filename='aircraft_db.csv', as_attachment=True
+        directory=folder, filename='aircraft_db.csv.gz', as_attachment=True
     )
 
 @app.route('/stats')

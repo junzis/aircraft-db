@@ -1,13 +1,15 @@
 import os
 import csv
+import gzip
 from webserver import mCollAC
 
 
 def adb2csv():
+    csvfilepath = os.path.dirname(os.path.realpath(__file__)) \
+        + '/files/aircraft_db.csv'
+    csvgzpath = os.path.dirname(os.path.realpath(__file__)) \
+        + '/files/aircraft_db.csv.gz'
     try:
-        csvfilepath = os.path.dirname(os.path.realpath(__file__)) \
-            + '/files/aircraft_db.csv'
-
         # check if tmp file is existing
         if os.path.isfile(csvfilepath):
             os.remove(csvfilepath)
@@ -34,7 +36,15 @@ def adb2csv():
             csvout.writerow(line)
         fcsv.close()
 
-        print "success: file exported"
+        print "csv file exported"
+
+        print 'compress csv to gzip'
+        f_in = open(csvfilepath)
+        f_out = gzip.open(csvgzpath, 'wb')
+        f_out.writelines(f_in)
+        f_out.close()
+        f_in.close()
+
     except Exception, e:
         print 'error occoured...'
         print e
