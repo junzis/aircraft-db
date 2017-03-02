@@ -13,7 +13,7 @@ def adb2csv():
             os.remove(csvfilepath)
 
         fcsv = open(csvfilepath, 'wt')
-        csvout = csv.writer(fcsv)
+        csvout = csv.writer(fcsv, lineterminator="\n")
 
         fields = ['icao', 'regid', 'mdl', 'type', 'operator']
 

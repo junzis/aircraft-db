@@ -36,6 +36,10 @@ def page_not_found(e):
 def internal_error(e):
     return page('500.html', e=e), 500
 
+@app.context_processor
+def inject_now():
+    return {'now': datetime.datetime.utcnow()}
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -97,13 +101,17 @@ def rand():
     return page('results.html', results=results, total_count=30, p=0)
 
 
+@app.route('/data')
+def data():
+    return page('data.html')
+
+
 @app.route('/download')
 def download():
     folder = os.path.join(app.root_path, 'files')
     return send_from_directory(
         directory=folder, filename='aircraft_db.csv', as_attachment=True
     )
-
 
 @app.route('/stats')
 def stats():

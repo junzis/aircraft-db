@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<div class="panel panel-success">
+  <div class="panel-heading">Download</div>
+  <div class="panel-body">
+    <br/>
+      <a href="{{url_for('download')}}"> Click to download dataset (.csv format) </a>
+    <br/><br/>
+  </div>
+</div>
+
+
+
+<div class="panel panel-success">
+  <div class="panel-heading">Cite this source</div>
+  <div class="panel-body">
+    <br/>
+    Sun, J. ({{ now.year }}). World Aircraft Database [Data file]. Retrieved from http://junzis.com/adb/data
+    <br/><br/>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+  $(window).load(function () {
+    $("#license-text").show();
+  });
+</script>
+
+{% endblock %}
