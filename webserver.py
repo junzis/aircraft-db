@@ -100,6 +100,11 @@ def rand():
     results = list(mCollAC.find().skip(r).limit(30))
     return page('results.html', results=results, total_count=30, p=0)
 
+@app.route('/newest')
+def newest():
+    results = list(mCollAC.find().sort('ts', -1).limit(30))
+    return page('results.html', results=results, total_count=30, p=0)
+
 
 @app.route('/data')
 def data():
