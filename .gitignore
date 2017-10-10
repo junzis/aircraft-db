@@ -1,4 +1,6 @@
-files
+files/aircraft_db.csv
+files/aircraft_db.zip
+
 !empty
 .DS_Store
 stat
