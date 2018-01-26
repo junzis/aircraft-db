@@ -1,3 +1,4 @@
+from __future__ import print_function
 import requests
 import re
 import time
@@ -109,7 +110,7 @@ def fetch_online_aircraft():
             response = s.get(url)
             data = response.json()
         except Exception, e:
-            print e
+            print(e)
             continue
 
         for key, val in data.iteritems():
@@ -117,7 +118,7 @@ def fetch_online_aircraft():
                 ac = get_ac(key, val)
                 acs.append(ac)
             except Exception, e:
-                # print e
+                # print(e)
                 continue
 
     # Update or insert record
@@ -144,7 +145,7 @@ def update_info(ac):
         d = data['result']['response']['data']['flight']['aircraft']
 
         ac['operator'] = trim_label(d['owner'])
-        ac['type'] = d['model']['text']
+        ac['type'] = d['model']['text'].strip()
 
         mCollAC.update({'icao': ac['icao']}, ac)
         return True
@@ -165,15 +166,36 @@ def update_new_acs_info():
 
     for ac in acs:
         count += 1
-        print "%d of %d updated" % (count, total_count)
+        print("%d of %d updated" % (count, total_count))
 
         update_info(ac)
         time.sleep(0.5)
 
 
+# ---------------------------------------------------
+# functions to fix dirty strings in existing data
+# ---------------------------------------------------
+
 def trim_all_oeprator_labels():
     acs = mCollAC.find()
+    total = acs.count()
+
     for ac in acs:
+        if i % 1000 == 0:
+            print("%d of %d completed." % (i, total))
+
         if 'operator' in ac:
             ac['operator'] = trim_label(ac['operator'])
-            mCollAC.update({'icao': ac['icao']}, ac, upsert=True)
+            mCollAC.replace_one({'icao': ac['icao']}, ac, upsert=True)
+
+def trim_all_type_labels():
+    acs = mCollAC.find()
+    total = acs.count()
+
+    for i, ac in enumerate(acs):
+        if i % 1000 == 0:
+            print("%d of %d completed." % (i, total))
+
+        if ('type' in ac) and (ac['type'] is not None):
+            ac['type'] = trim_label(ac['type'])
+            mCollAC.replace_one({'icao': ac['icao']}, ac, upsert=True)
