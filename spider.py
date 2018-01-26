@@ -180,13 +180,13 @@ def trim_all_oeprator_labels():
     acs = mCollAC.find()
     total = acs.count()
 
-    for ac in acs:
+    for i, ac in enumerate(acs):
         if i % 1000 == 0:
             print("%d of %d completed." % (i, total))
 
         if 'operator' in ac:
             ac['operator'] = trim_label(ac['operator'])
-            mCollAC.replace_one({'icao': ac['icao']}, ac, upsert=True)
+            mCollAC.replace_one({'_id': ac['_id']}, ac, upsert=True)
 
 def trim_all_type_labels():
     acs = mCollAC.find()
@@ -198,4 +198,4 @@ def trim_all_type_labels():
 
         if ('type' in ac) and (ac['type'] is not None):
             ac['type'] = trim_label(ac['type'])
-            mCollAC.replace_one({'icao': ac['icao']}, ac, upsert=True)
+            mCollAC.replace_one({'_id': ac['_id']}, ac, upsert=True)
